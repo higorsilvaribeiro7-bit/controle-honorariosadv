@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Financeira - Advocacia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section h2 {
+            color: #333;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f9f9f9;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            background: #28a745;
+            margin: 0 2px;
+        }
+
+        .btn-small:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .parcela-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .parcela-item.paga {
+            opacity: 0.6;
+            border-left-color: #28a745;
+        }
+
+        .parcela-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .parcela-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-paga {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-vencida {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Calculadora Financeira</h1>
+            <p>Controle de Recebíveis para Escritório de Advocacia</p>
+        </div>
+
+        <div class="content">
+            <!-- Seção Esquerda: Clientes e Cobranças -->
+            <div class="section">
+                <div>
+                    <h2>👥 Clientes</h2>
+                    <div class="form-group">
+                        <label for="nomeCliente">Nome Completo</label>
+                        <input type="text" id="nomeCliente" placeholder="Ex: João Silva">
+                    </div>
+                    <div class="form-group">
+                        <label for="cpfCliente">CPF</label>
+                        <input type="text" id="cpfCliente" placeholder="Ex: 123.456.789-00">
+                    </div>
+                    <button onclick="adicionarCliente()">Adicionar Cliente</button>
+
+                    <div class="table-container" id="tabelaClientes" style="display: none; margin-top: 20px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Saldo Devedor</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoClientes"></tbody>
+                        </table>
+                    </div>
+                    <div id="clientesVazio" class="empty-state">
+                        <p>Nenhum cliente cadastrado</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>💰 Nova Cobrança</h2>
+                    <div class="form-group">
+                        <label for="clienteCobranca">Cliente</label>
+                        <select id="clienteCobranca">
+                            <option value="">Selecione um cliente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricaoCobranca">Descrição</label>
+                        <input type="text" id="descricaoCobranca" placeholder="Ex: Honorários - Processo de Divórcio">
+                    </div>
+                    <div class="form-group">
+                        <label for="valorCobranca">Valor Total (R$)</label>
+                        <input type="number" id="valorCobranca" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoPagamento">Tipo de Pagamento</label>
+                        <select id="tipoPagamento" onchange="atualizarFormularioCobranca()">
+                            <option value="vista">À Vista</option>
+                            <option value="parcelado">Parcelado</option>
+                        </select>
+                    </div>
+                    <div id="parcelasDiv" style="display: none;">
+                        <div class="form-group">
+                            <label for="numParcelas">Número de Parcelas</label>
+                            <input type="number" id="numParcelas" placeholder="3" min="2" max="12" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="dataPrimeiraParcela">Data da Primeira Parcela</label>
+                            <input type="date" id="dataPrimeiraParcela">
+                        </div>
+                    </div>
+                    <button onclick="adicionarCobranca()">Adicionar Cobrança</button>
+                </div>
+            </div>
+
+            <!-- Seção Direita: Cobranças e Lembretes -->
+            <div class="section">
+                <div>
+                    <h2>📋 Cobranças Registradas</h2>
+                    
+                    <div class="stats" id="statsCobrancas"></div>
+
+                    <div class="table-container" id="tabelaCobracas" style="display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Tipo</th>
+                                    <th>Saldo</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoCobracas"></tbody>
+                        </table>
+                    </div>
+                    <div id="cobracasVazio" class="empty-state">
+                        <p>Nenhuma cobrança registrada</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>🔔 Lembretes (Próximos 7 dias)</h2>
+                    <div id="lembretes"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Parcelas -->
+        <div style="padding: 30px; border-top: 2px solid #ddd;">
+            <h2 style="margin-bottom: 20px;">📅 Gerenciar Parcelas</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="mudarAba('parcelas-pendentes')">Pendentes</button>
+                <button class="tab-btn" onclick="mudarAba('parcelas-pagas')">Pagas</button>
+            </div>
+            <div id="parcelas-pendentes" class="tab-content active"></div>
+            <div id="parcelas-pagas" class="tab-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dados armazenados localmente
+        let dados = {
+            clientes: [],
+            cobracas: [],
+            parcelas: []
+        };
+
+        // Carregar dados do localStorage ao iniciar
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem('calculadoraFinanceira');
+            if (dadosSalvos) {
+                dados = JSON.parse(dadosSalvos);
+            }
+            atualizarInterface();
+        }
+
+        // Salvar dados no localStorage
+        function salvarDados() {
+            localStorage.setItem('calculadoraFinanceira', JSON.stringify(dados));
+            atualizarInterface();
+        }
+
+        // Adicionar cliente
+        function adicionarCliente() {
+            const nome = document.getElementById('nomeCliente').value.trim();
+            const cpf = document.getElementById('cpfCliente').value.trim();
+
+            if (!nome || !cpf) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            const cliente = {
+                id: Date.now(),
+                nome: nome,
+                cpf: cpf
+            };
+
+            dados.clientes.push(cliente);
+            salvarDados();
+
+            document.getElementById('nomeCliente').value = '';
+            document.getElementById('cpfCliente').value = '';
+        }
+
+        // Adicionar cobrança
+        function adicionarCobranca() {
+            const clienteId = document.getElementById('clienteCobranca').value;
+            const descricao = document.getElementById('descricaoCobranca').value.trim();
+            const valor = parseFloat(document.getElementById('valorCobranca').value);
+            const tipo = document.getElementById('tipoPagamento').value;
+
+            if (!clienteId || !descricao || !valor || valor <= 0) {
+                alert('Por favor, preencha todos os campos corretamente');
+                return;
+            }
+
+            const cobranca = {
+                id: Date.now(),
+                clienteId: parseInt(clienteId),
+                descricao: descricao,
+                valor: valor,
+                tipo: tipo,
+                dataCriacao: new Date().toISOString().split('T')[0]
+            };
+
+            dados.cobracas.push(cobranca);
+
+            // Criar parcelas se for parcelado
+            if (tipo === 'parcelado') {
+                const numParcelas = parseInt(document.getElementById('numParcelas').value);
+                const dataPrimeira = document.getElementById('dataPrimeiraParcela').value;
+
+                if (!dataPrimeira) {
+                    alert('Por favor, defina a data da primeira parcela');
+                    dados.cobracas.pop();
+                    return;
+                }
+
+                const valorParcela = valor / numParcelas;
+                let data = new Date(dataPrimeira);
+
+                for (let i = 1; i <= numParcelas; i++) {
+                    const parcela = {
+                        id: Date.now() + i,
+                        cobrancaId: cobranca.id,
+                        numero: i,
+                        valor: parseFloat(valorParcela.toFixed(2)),
+                        dataVencimento: data.toISOString().split('T')[0],
+                        paga: false
+                    };
+                    dados.parcelas.push(parcela);
+                    data.setMonth(data.getMonth() + 1);
+                }
+            } else {
+                // Para pagamento à vista, criar uma única parcela
+                const parcela = {
+                    id: Date.now(),
+                    cobrancaId: cobranca.id,
+                    numero: 1,
+                    valor: valor,
+                    dataVencimento: new Date().toISOString().split('T')[0],
+                    paga: false
+                };
+                dados.parcelas.push(parcela);
+            }
+
+            salvarDados();
+
+            document.getElementById('descricaoCobranca').value = '';
+            document.getElementById('valorCobranca').value = '';
+            document.getElementById('numParcelas').value = '3';
+            document.getElementById('dataPrimeiraParcela').value = '';
+        }
+
+        // Marcar parcela como paga
+        function marcarComoPaga(parcelaId) {
+            const parcela = dados.parcelas.find(p => p.id === parcelaId);
+            if (parcela) {
+                parcela.paga = !parcela.paga;
+                salvarDados();
+            }
+        }
+
+        // Deletar cliente
+        function deletarCliente(clienteId) {
+            if (confirm('Tem certeza que deseja deletar este cliente?')) {
+                dados.clientes = dados.clientes.filter(c => c.id !== clienteId);
+                dados.cobracas = dados.cobracas.filter(c => c.clienteId !== clienteId);
+                dados.parcelas = dados.parcelas.filter(p => {
+                    const cobranca = dados.cobracas.find(c => c.id === p.cobrancaId);
+                    return cobranca !== undefined;
+                });
+                salvarDados();
+            }
+        }
+
+        // Deletar cobrança
+        function deletarCobranca(cobrancaId) {
+            if (confirm('Tem certeza que deseja deletar esta cobrança?')) {
+                dados.cobracas = dados.cobracas.filter(c => c.id !== cobrancaId);
+                dados.parcelas = dados.parcelas.filter(p => p.cobrancaId !== cobrancaId);
+                salvarDados();
+            }
+        }
+
+        // Atualizar formulário de cobrança
+        function atualizarFormularioCobranca() {
+            const tipo = document.getElementById('tipoPagamento').value;
+            const parcelasDiv = document.getElementById('parcelasDiv');
+            parcelasDiv.style.display = tipo === 'parcelado' ? 'block' : 'none';
+        }
+
+        // Calcular saldo devedor de um cliente
+        function calcularSaldoCliente(clienteId) {
+            const cobrancasCliente = dados.cobracas.filter(c => c.clienteId === clienteId);
+            let saldo = 0;
+
+            cobrancasCliente.forEach(cobranca => {
+                const parcelasCobranca = dados.parcelas.filter(p => p.cobrancaId === cobranca.id);
+                parcelasCobranca.forEach(parcela => {
+                    if (!parcela.paga) {
+                        saldo += parcela.valor;
+                    }
+                });
+            });
+
+            return saldo;
+        }
+
+        // Calcular saldo devedor de uma cobrança
+        function calcularSaldoCobranca(cobrancaId) {
+            const parcelas = dados.parcelas.filter(p => p.cobrancaId === cobrancaId);
+            let saldo = 0;
+
+            parcelas.forEach(parcela => {
+                if (!parcela.paga) {
+                    saldo += parcela.valor;
+                }
+            });
+
+            return saldo;
+        }
+
+        // Obter lembretes (próximos 7 dias)
+        function obterLembretes() {
+            const hoje = new Date();
+            const proximos7Dias = new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            return dados.parcelas.filter(p => {
+                if (p.paga) return false;
+                const dataVencimento = new Date(p.dataVencimento);
+                return dataVencimento >= hoje && dataVencimento <= proximos7Dias;
+            }).sort((a, b) => new Date(a.dataVencimento) - new Date(b.dataVencimento));
+        }
+
+        // Mudar aba
+        function mudarAba(abaId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(abaId).classList.add('active');
+            event.target.classList.add('active');
+
+            atualizarParcelas();
+        }
+
+        // Atualizar interface
+        function atualizarInterface() {
+            atualizarClientes();
+            atualizarCobracas();
+            atualizarLembretes();
+            atualizarParcelas();
+            atualizarSelectClientes();
+        }
+
+        // Atualizar tabela de clientes
+        function atualizarClientes() {
+            const tbody = document.getElementById('corpoClientes');
+            const tabelaDiv = document.getElementById('tabelaClientes');
+            const vazioDiv = document.getElementById('clientesVazio');
+
+            tbody.innerHTML = '';
+
+            if (dados.clientes.length === 0) {
+                tabelaDiv.style.display = 'none';
+                vazioDiv.style.display = 'block';
+                return;
+            }
+
+            tabelaDiv.style.display = 'block';
+            vazioDiv.style.display = 'none';
+
+            dados.clientes.forEach(cliente => {
+                const saldo = calcularSaldoCliente(cliente.id);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.cpf}</td>
+                    <td><strong>R$ ${saldo.toFixed(2)}</strong></td>
+                    <td><button class="btn-small btn-delete" onclick="deletarCliente(${cliente.id})">Deletar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Atualizar tabela de cobranças
+        function atualizarCobracas() {
+            const tbody = document.getElementById('corpoCobracas');
+            const tabelaDiv = document.getElementById('tabelaCobracas');
+            const vazioDiv = document.getElementById('cobracasVazio');
+            const statsDiv = document.getElementById('statsCobrancas');
+
+            tbody.innerHTML = '';
+            statsDiv.innerHTML = '';
+
+            if (dados.cobracas.length === 0) {
+                tabelaDiv.style.display = 'none';
+                vazioDiv.style.display = 'block';
+                return;
+            }
+
+            tabelaDiv.style.display = 'block';
+            vazioDiv.style.display = 'none';
+
+            // Calcular estatísticas
+            let totalCobrado = 0;
+            let totalDevedor = 0;
+
+            dados.cobracas.forEach(cobranca => {
+                const cliente = dados.clientes.find(c => c.id === cobranca.clienteId);
+                const saldo = calcularSaldoCobranca(cobranca.id);
+                const cobrado = cobranca.valor - saldo;
+
+                totalCobrado += cobrado;
+                totalDevedor += saldo;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente ? cliente.nome : 'Cliente Deletado'}</td>
+                    <td>${cobranca.descricao}</td>
+                    <td>R$ ${cobranca.valor.toFixed(2)}</td>
+                    <td>${cobranca.tipo === 'vista' ? 'À Vista' : 'Parcelado'}</td>
+                    <td><strong>R$ ${saldo.toFixed(2)}</strong></td>
+                    <td><button class="btn-small btn-delete" onclick="deletarCobranca(${cobranca.id})">Deletar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Mostrar estatísticas
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <h3>Total Cobrado</h3>
+                    <div class="value">R$ ${totalCobrado.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Devedor</h3>
+                    <div class="value">R$ ${totalDevedor.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Registrado</h3>
+                    <div class="value">R$ ${(totalCobrado + totalDevedor).toFixed(2)}</div>
+                </div>
+            `;
+        }
+
+        // Atualizar lembretes
+        function atualizarLembretes() {
+            const lembretesDiv = document.getElementById('lembretes');
+            const lembretes = obterLembretes();
+
+            if (lembretes.length === 0) {
+                lembretesDiv.innerHTML = '<div class="alert alert-info">✅ Nenhuma parcela a vencer nos próximos 7 dias</div>';
+                return;
+            }
+
+            let html = `<div class="alert alert-warning">⚠️ ${lembretes.length} parcela(s) a vencer nos próximos 7 dias</div>`;
+
+            lembretes.forEach(parcela => {
+                const cobranca = dados.cobracas.find(c => c.id === parcela.cobrancaId);
+                const cliente = dados.clientes.find(c => c.id === cobranca.clienteId);
+                const dias = Math.ceil((new Date(parcela.dataVencimento) - new Date()) / (1000 * 60 * 60 * 24));
+
+                html += `
+                    <div class="parcela-item">
+                        <div class="parcela-info">
+                            <div>
+                                <strong>${cliente.nome}</strong> - ${cobranca.descricao}<br>
+                                <small>Parcela ${parcela.numero} de R$ ${parcela.valor.toFixed(2)}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.2em; font-weight: bold; color: #667eea;">R$ ${parcela.valor.toFixed(2)}</div>
+                                <small style="color: #999;">Vence em ${dias} dia${dias !== 1 ? 's' : ''}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lembretesDiv.innerHTML = html;
+        }
+
+        // Atualizar parcelas
+        function atualizarParcelas() {
+            const pendentesDiv = document.getElementById('parcelas-pendentes');
+            const pagasDiv = document.getElementById('parcelas-pagas');
+
+            let htmlPendentes = '';
+            let htmlPagas = '';
+
+            dados.parcelas.forEach(parcela => {
+                const cobranca = dados.cobracas.find(c => c.id === parcela.cobrancaId);
+                if (!cobranca) return;
+
+                const cliente = dados.clientes.find(c => c.id === cobranca.clienteId);
+                if (!cliente) return;
+
+                const dataVencimento = new Date(parcela.dataVencimento);
+                const hoje = new Date();
+                let statusClass = 'status-pendente';
+                let statusTexto = 'Pendente';
+
+                if (parcela.paga) {
+                    statusClass = 'status-paga';
+                    statusTexto = 'Paga';
+                } else if (dataVencimento < hoje) {
+                    statusClass = 'status-vencida';
+                    statusTexto = 'Vencida';
+                }
+
+                const html = `
+                    <div class="parcela-item ${parcela.paga ? 'paga' : ''}">
+                        <div class="parcela-info">
+                            <div>
+                                <strong>${cliente.nome}</strong> - ${cobranca.descricao}<br>
+                                <small>Parcela ${parcela.numero} | Vencimento: ${new Date(parcela.dataVencimento).toLocaleDateString('pt-BR')}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.3em; font-weight: bold; color: #667eea;">R$ ${parcela.valor.toFixed(2)}</div>
+                                <span class="parcela-status ${statusClass}">${statusTexto}</span>
+                            </div>
+                        </div>
+                        <button class="btn-small" onclick="marcarComoPaga(${parcela.id})">
+                            ${parcela.paga ? '↩️ Marcar como Pendente' : '✓ Marcar como Paga'}
+                        </button>
+                    </div>
+                `;
+
+                if (parcela.paga) {
+                    htmlPagas += html;
+                } else {
+                    htmlPendentes += html;
+                }
+            });
+
+            pendentesDiv.innerHTML = htmlPendentes || '<div class="empty-state"><p>Nenhuma parcela pendente</p></div>';
+            pagasDiv.innerHTML = htmlPagas || '<div class="empty-state"><p>Nenhuma parcela paga</p></div>';
+        }
+
+        // Atualizar select de clientes
+        function atualizarSelectClientes() {
+            const select = document.getElementById('clienteCobranca');
+            const opcaoAtual = select.value;
+
+            select.innerHTML = '<option value="">Selecione um cliente</option>';
+
+            dados.clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = cliente.nome;
+                select.appendChild(option);
+            });
+
+            select.value = opcaoAtual;
+        }
+
+        // Inicializar ao carregar a página
+        window.addEventListener('load', carregarDados);
+    </script>
+</body>
+</html>
+
